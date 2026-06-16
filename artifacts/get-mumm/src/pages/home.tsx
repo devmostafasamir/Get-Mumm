@@ -30,10 +30,10 @@ export default function Home() {
   const heroWords = heroHeadline.split(" ");
 
   const stats = [
-    { value: "10K+", label: t("Meals Delivered", "وجبة تم توصيلها") },
-    { value: "50+", label: t("Chefs Empowered", "شيف تم دعمها") },
-    { value: "5K+", label: t("Happy Customers", "عميل سعيد") },
-    { value: "4.9★", label: t("Average Rating", "متوسط التقييم") },
+    { value: "200+", label: t("Active Kitchens", "مطبخ نشط") },
+    { value: "193K", label: t("Facebook Followers", "متابع على فيسبوك") },
+    { value: "80%", label: t("Repeat Customers", "عملاء متكررون") },
+    { value: "2015", label: t("Founded in Cairo", "تأسست في القاهرة") },
   ];
 
   return (
@@ -466,26 +466,28 @@ export default function Home() {
             transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1], delay: 0.1 }}
           >
             <motion.div whileHover={{ scale: 1.04 }} whileTap={{ scale: 0.97 }} transition={{ type: "spring", stiffness: 340, damping: 22 }}>
-              <Button size="lg" className="h-16 px-8 rounded-2xl bg-foreground text-background hover:bg-foreground/85 flex items-center gap-3">
+              <Button size="lg" className="h-16 px-8 rounded-2xl bg-foreground text-background hover:bg-foreground/85 flex items-center gap-3 cursor-not-allowed opacity-70" disabled>
                 <svg className="w-8 h-8 shrink-0" viewBox="0 0 24 24" fill="currentColor">
                   <path d="M17.05 20.28c-.98.95-2.05.8-3.08.35-1.09-.46-2.09-.48-3.24 0-1.44.62-2.2.44-3.06-.35C2.79 15.25 3.51 7.59 9.05 7.31c1.35.07 2.29.74 3.08.8 1.18-.19 2.31-.88 3.5-.8 1.48.06 2.65.65 3.37 1.72-2.91 1.78-2.45 5.56.35 6.78-.65 1.63-1.46 3.2-2.3 4.47M12.03 7.25c-.15-2.23 1.66-4.07 3.74-4.25.29 2.58-2.34 4.5-3.74 4.25" />
                 </svg>
-                <div className="text-left">
-                  <div className="text-xs opacity-75">Download on the</div>
+                <div className={isRtl ? "text-right" : "text-left"}>
+                  <div className="text-xs opacity-75">{t("Coming Soon", "قريباً")}</div>
                   <div className="font-bold text-lg leading-none">App Store</div>
                 </div>
               </Button>
             </motion.div>
             <motion.div whileHover={{ scale: 1.04 }} whileTap={{ scale: 0.97 }} transition={{ type: "spring", stiffness: 340, damping: 22 }}>
-              <Button size="lg" className="h-16 px-8 rounded-2xl bg-foreground text-background hover:bg-foreground/85 flex items-center gap-3">
-                <svg className="w-8 h-8 shrink-0" viewBox="0 0 24 24" fill="currentColor">
-                  <path d="M3.609 1.814L13.792 12 3.61 22.186a1.986 1.986 0 0 1-.505-1.309V3.123c0-.495.188-.95.504-1.309zM14.54 12.748l2.616 2.616-12.213 7.052 9.597-9.668zm.725-.725l4.575-2.641a1.217 1.217 0 0 1 1.157 2.12l-4.575 2.641-1.157-2.12zm-1.156-2.12L4.512 2.85l12.213 7.053-2.616 2.616z" />
-                </svg>
-                <div className="text-left">
-                  <div className="text-xs opacity-75">GET IT ON</div>
-                  <div className="font-bold text-lg leading-none">Google Play</div>
-                </div>
-              </Button>
+              <a href="https://play.google.com/store/apps/details?id=com.getmumm.mummprime" target="_blank" rel="noopener noreferrer">
+                <Button size="lg" className="h-16 px-8 rounded-2xl bg-foreground text-background hover:bg-foreground/85 flex items-center gap-3">
+                  <svg className="w-8 h-8 shrink-0" viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M3.609 1.814L13.792 12 3.61 22.186a1.986 1.986 0 0 1-.505-1.309V3.123c0-.495.188-.95.504-1.309zM14.54 12.748l2.616 2.616-12.213 7.052 9.597-9.668zm.725-.725l4.575-2.641a1.217 1.217 0 0 1 1.157 2.12l-4.575 2.641-1.157-2.12zm-1.156-2.12L4.512 2.85l12.213 7.053-2.616 2.616z" />
+                  </svg>
+                  <div className={isRtl ? "text-right" : "text-left"}>
+                    <div className="text-xs opacity-75">GET IT ON</div>
+                    <div className="font-bold text-lg leading-none">Google Play</div>
+                  </div>
+                </Button>
+              </a>
             </motion.div>
           </motion.div>
         </div>
