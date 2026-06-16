@@ -1,76 +1,76 @@
 import type { Variants, Transition } from "framer-motion";
 
-// ─── Custom easing ─────────────────────────────────────────────────────────────
+// ─── Custom easing ──────────────────────────────────────────────────────────
 export const ease = {
-  // Smooth deceleration — feels natural and premium
   out: [0.22, 1, 0.36, 1] as [number, number, number, number],
-  // Quick ease-in for exits
   in: [0.55, 0, 1, 0.45] as [number, number, number, number],
-  // Spring-like bounce easing
   spring: [0.34, 1.56, 0.64, 1] as [number, number, number, number],
 };
 
-// ─── Page Transition ────────────────────────────────────────────────────────────
-// Used at App level — wraps entire route in AnimatePresence
+// ─── Page Transition ────────────────────────────────────────────────────────
 export const pageVariants: Variants = {
-  initial: {
-    opacity: 0,
-    y: 18,
-    filter: "blur(8px)",
-  },
+  initial: { opacity: 0, y: 18, filter: "blur(8px)" },
   enter: {
     opacity: 1,
     y: 0,
     filter: "blur(0px)",
-    transition: {
-      duration: 0.52,
-      ease: ease.out,
-    },
+    transition: { duration: 0.52, ease: ease.out },
   },
   exit: {
     opacity: 0,
     y: -10,
     filter: "blur(6px)",
-    transition: {
-      duration: 0.22,
-      ease: ease.in,
-    },
+    transition: { duration: 0.22, ease: ease.in },
   },
 };
 
-// ─── Stagger Grid (cards, lists) ───────────────────────────────────────────────
-// Container — animate="show" triggers stagger on children
+// ─── Stagger Grid (cards — animate mode) ────────────────────────────────────
+// Use with initial="hidden" animate="show" exit="exit" — for filter-driven grids
 export const staggerGrid: Variants = {
   hidden: { opacity: 0 },
   show: {
     opacity: 1,
-    transition: {
-      staggerChildren: 0.07,
-      delayChildren: 0.04,
-    },
+    transition: { staggerChildren: 0.05, delayChildren: 0 },
   },
   exit: {
     opacity: 0,
-    transition: { duration: 0.15 },
+    transition: { duration: 0.12, ease: ease.in },
   },
 };
 
-// Individual card
+// Individual card — animate mode (stagger child)
 export const cardVariant: Variants = {
+  hidden: { opacity: 0, y: 24, scale: 0.97 },
+  show: {
+    opacity: 1,
+    y: 0,
+    scale: 1,
+    transition: { type: "spring", stiffness: 260, damping: 24 },
+  },
+  exit: { opacity: 0, scale: 0.97, transition: { duration: 0.1 } },
+};
+
+// ─── Stagger Grid (whileInView mode) ────────────────────────────────────────
+// Use with initial="hidden" whileInView="show" — for scroll-reveal grids
+export const staggerGridInView: Variants = {
+  hidden: { opacity: 0 },
+  show: {
+    opacity: 1,
+    transition: { staggerChildren: 0.07, delayChildren: 0.04 },
+  },
+};
+
+export const cardVariantInView: Variants = {
   hidden: { opacity: 0, y: 28, scale: 0.96 },
   show: {
     opacity: 1,
     y: 0,
     scale: 1,
-    transition: {
-      type: "spring" as const,
-      stiffness: 230,
-      damping: 22,
-    },
+    transition: { type: "spring", stiffness: 230, damping: 22 },
   },
 };
 
-// ─── Scroll-triggered Section ──────────────────────────────────────────────────
+// ─── Scroll-triggered Section ───────────────────────────────────────────────
 export const sectionReveal = {
   initial: { opacity: 0, y: 40 },
   whileInView: { opacity: 1, y: 0 },
@@ -78,15 +78,11 @@ export const sectionReveal = {
   transition: { duration: 0.65, ease: ease.out },
 };
 
-// Stagger for a section's children (whileInView mode)
 export const sectionStagger: Variants = {
   initial: {},
-  whileInView: {
-    transition: { staggerChildren: 0.1 },
-  },
+  whileInView: { transition: { staggerChildren: 0.1 } },
 };
 
-// Child item for sectionStagger
 export const sectionItem: Variants = {
   initial: { opacity: 0, y: 24 },
   whileInView: {
@@ -96,11 +92,7 @@ export const sectionItem: Variants = {
   },
 };
 
-// ─── Hero Word Reveal ──────────────────────────────────────────────────────────
-// Returns props for each word in a "slide up" headline reveal.
-// Wrap each word in: <span className="inline-block overflow-hidden">
-//   <motion.span className="inline-block" {...wordReveal(i)} />
-// </span>
+// ─── Hero Word Reveal ───────────────────────────────────────────────────────
 export function wordReveal(index: number, baseDelay = 0.08): {
   initial: object;
   animate: object;
@@ -117,7 +109,7 @@ export function wordReveal(index: number, baseDelay = 0.08): {
   };
 }
 
-// ─── Fade Up (general purpose) ─────────────────────────────────────────────────
+// ─── Fade Up ────────────────────────────────────────────────────────────────
 export const fadeUp = {
   initial: { opacity: 0, y: 28 },
   animate: { opacity: 1, y: 0 },
@@ -129,8 +121,7 @@ export const fadeUpTransition = (delay = 0): Transition => ({
   delay,
 });
 
-// ─── PageWrapper backward-compat exports ───────────────────────────────────────
-// Keep these so existing home.tsx imports don't break
+// ─── Backward-compat exports (used by home.tsx, for-offices.tsx etc.) ────────
 export const fadeInUp = {
   initial: { opacity: 0, y: 32 },
   whileInView: { opacity: 1, y: 0 },
@@ -140,9 +131,7 @@ export const fadeInUp = {
 
 export const staggerContainer = {
   initial: {},
-  whileInView: {
-    transition: { staggerChildren: 0.11 },
-  },
+  whileInView: { transition: { staggerChildren: 0.11 } },
   viewport: { once: true, margin: "-80px" },
 };
 
