@@ -122,9 +122,32 @@ export default function Home() {
           </motion.div>
         </div>
 
-        {/* Scroll indicator — direct child of section so bottom-8 is correct */}
+        {/* ── Wave at hero bottom — carousel colour bites up into hero ─── */}
+        <div
+          aria-hidden
+          style={{
+            position: "absolute", bottom: 0, left: 0, right: 0,
+            height: 96, zIndex: 5, pointerEvents: "none",
+            color: "var(--carousel-bg, #C44E22)",
+            transition: "color 650ms cubic-bezier(0.4,0,0.2,1)",
+          }}
+        >
+          <svg
+            viewBox="0 0 1440 96"
+            preserveAspectRatio="none"
+            xmlns="http://www.w3.org/2000/svg"
+            style={{ position: "absolute", bottom: 0, left: 0, width: "100%", height: 96 }}
+          >
+            <path
+              d="M0,24 C120,72 240,4 360,32 C480,62 600,6 720,38 C840,70 960,8 1080,34 C1200,62 1340,10 1440,24 L1440,96 L0,96 Z"
+              fill="currentColor"
+            />
+          </svg>
+        </div>
+
+        {/* Scroll indicator — sits above the wave */}
         <motion.div
-          className="absolute bottom-8 left-1/2 -translate-x-1/2 z-10"
+          className="absolute bottom-28 left-1/2 -translate-x-1/2 z-10"
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ delay: 1.4, duration: 0.6 }}
@@ -150,7 +173,30 @@ export default function Home() {
       <FoodCarousel />
 
       {/* ─── Stats Strip ───────────────────────────────────────────────── */}
-      <section className="bg-accent py-14 overflow-hidden">
+      <section className="relative bg-accent pt-28 pb-14 overflow-hidden">
+        {/* ── Wave at stats top — carousel colour flows down into stats ─── */}
+        <div
+          aria-hidden
+          style={{
+            position: "absolute", top: 0, left: 0, right: 0,
+            height: 96, zIndex: 5, pointerEvents: "none",
+            color: "var(--carousel-bg, #C44E22)",
+            transition: "color 650ms cubic-bezier(0.4,0,0.2,1)",
+          }}
+        >
+          <svg
+            viewBox="0 0 1440 96"
+            preserveAspectRatio="none"
+            xmlns="http://www.w3.org/2000/svg"
+            style={{ position: "absolute", top: 0, left: 0, width: "100%", height: 96 }}
+          >
+            <path
+              d="M0,72 C120,24 240,96 360,60 C480,24 600,88 720,54 C840,20 960,84 1080,56 C1200,28 1340,82 1440,72 L1440,0 L0,0 Z"
+              fill="currentColor"
+            />
+          </svg>
+        </div>
+
         <div className="container mx-auto px-4">
           <motion.div
             variants={sectionStagger}
