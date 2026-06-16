@@ -9,6 +9,7 @@ import { Link } from "wouter";
 import { Star, ArrowRight, ArrowLeft, Quote } from "lucide-react";
 import { useState } from "react";
 import { Skeleton } from "@/components/ui/skeleton";
+import { FoodCarousel } from "@/components/home/FoodCarousel";
 import {
   wordReveal,
   fadeUp,
@@ -144,6 +145,9 @@ export default function Home() {
           </p>
         </motion.div>
       </section>
+
+      {/* ─── Food Carousel ─────────────────────────────────────────────── */}
+      <FoodCarousel />
 
       <WaveDivider bg="var(--color-background)" fill="var(--color-accent)" />
 
