@@ -245,17 +245,32 @@ export function FoodCarousel() {
                 ...roleStyle(role(i), mobile),
               }}
             >
+              {/* Pulse skeleton — visible while image is decoding */}
+              <div
+                aria-hidden
+                style={{
+                  position: "absolute", inset: 0,
+                  borderRadius: "50%",
+                  background: "rgba(255,255,255,0.12)",
+                  animation: "carousel-pulse 1.6s ease-in-out infinite",
+                }}
+              />
               <img
                 src={d.src}
                 alt={d.name}
                 draggable={false}
+                /* i===0 is the hero dish — already preloaded, mark it high priority */
+                fetchPriority={i === 0 ? "high" : "auto"}
                 loading="eager"
-                /* Start invisible; fade in once the browser has decoded
-                   the image — prevents the blank-circle flash on first load */
+                /* Fade in once decoded — hides skeleton automatically */
                 onLoad={(e) => {
-                  (e.currentTarget as HTMLImageElement).style.opacity = "1";
+                  const img = e.currentTarget as HTMLImageElement;
+                  img.style.opacity = "1";
+                  const skel = img.previousSibling as HTMLElement | null;
+                  if (skel) skel.style.display = "none";
                 }}
                 style={{
+                  position: "relative",
                   width: "100%", height: "100%",
                   objectFit: "cover",
                   objectPosition: "center",

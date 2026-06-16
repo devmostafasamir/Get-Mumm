@@ -1,4 +1,4 @@
-import type { Variants, Transition } from "framer-motion";
+import type { Variants, Transition, TargetAndTransition } from "framer-motion";
 
 // ─── Custom easing ──────────────────────────────────────────────────────────
 export const ease = {
@@ -8,19 +8,19 @@ export const ease = {
 };
 
 // ─── Page Transition ────────────────────────────────────────────────────────
+// Keep blur off initial/enter — it's expensive on mobile and causes a FOUC
+// on first load. A clean opacity+y fade is snappier and equally polished.
 export const pageVariants: Variants = {
-  initial: { opacity: 0, y: 18, filter: "blur(8px)" },
+  initial: { opacity: 0, y: 14 },
   enter: {
     opacity: 1,
     y: 0,
-    filter: "blur(0px)",
-    transition: { duration: 0.52, ease: ease.out },
+    transition: { duration: 0.42, ease: ease.out },
   },
   exit: {
     opacity: 0,
-    y: -10,
-    filter: "blur(6px)",
-    transition: { duration: 0.22, ease: ease.in },
+    y: -8,
+    transition: { duration: 0.18, ease: ease.in },
   },
 };
 
@@ -94,8 +94,8 @@ export const sectionItem: Variants = {
 
 // ─── Hero Word Reveal ───────────────────────────────────────────────────────
 export function wordReveal(index: number, baseDelay = 0.08): {
-  initial: object;
-  animate: object;
+  initial: TargetAndTransition;
+  animate: TargetAndTransition;
   transition: Transition;
 } {
   return {

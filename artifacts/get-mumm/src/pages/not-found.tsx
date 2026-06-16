@@ -18,16 +18,15 @@ const fadeUp = {
   show: { opacity: 1, y: 0, transition: { duration: 0.6, ease: ease.out } },
 };
 
-const floatAnim = {
-  animate: {
-    y: [0, -14, 0],
-    rotate: [-2, 2, -2],
-    transition: {
-      duration: 4.5,
-      ease: "easeInOut",
-      repeat: Infinity,
-    },
-  },
+const floatAnimate = {
+  y: [0, -14, 0],
+  rotate: [-2, 2, -2],
+};
+
+const floatTransition = {
+  duration: 4.5,
+  ease: "easeInOut" as const,
+  repeat: Infinity,
 };
 
 const WORDS_EN = ["Page", "Not", "Found"];
@@ -58,8 +57,8 @@ export default function NotFound() {
 
       {/* Floating bowl emoji */}
       <motion.div
-        variants={floatAnim}
-        animate="animate"
+        animate={floatAnimate}
+        transition={floatTransition}
         className="mb-8 select-none"
         style={{ fontSize: "clamp(3.5rem, 10vw, 6rem)", lineHeight: 1 }}
         aria-hidden
