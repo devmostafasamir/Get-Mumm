@@ -36,9 +36,12 @@ export default function BlogPage() {
 
   useEffect(() => { setCurrentPage(1); }, [filter, debouncedSearch]);
 
-  const { data: posts, isLoading } = useListBlogPosts(
+  const { data: posts, isLoading, isError, error, status, fetchStatus } = useListBlogPosts(
     filter === "all" ? undefined : { type: filter }
   );
+
+  // Temporary debug logging
+  console.log("[BlogPage] query state:", { status, fetchStatus, isLoading, isError, postsCount: posts?.length, error: error?.message });
 
   const filteredPosts = useMemo(() => {
     if (!posts) return [];

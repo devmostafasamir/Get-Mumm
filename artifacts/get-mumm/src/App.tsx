@@ -58,17 +58,17 @@ function AnimatedRoutes() {
   const [location] = useLocation();
 
   return (
-    <AnimatePresence mode="wait" initial>
-      <motion.div
-        key={location}
-        variants={pageVariants}
-        initial="initial"
-        animate="enter"
-        exit="exit"
-        className="flex-1 flex flex-col"
-        style={{ willChange: "opacity, transform, filter" }}
-      >
-        <Suspense fallback={<PageSpinner />}>
+    <Suspense fallback={<PageSpinner />}>
+      <AnimatePresence mode="wait" initial={false}>
+        <motion.div
+          key={location}
+          variants={pageVariants}
+          initial="initial"
+          animate="enter"
+          exit="exit"
+          className="flex-1 flex flex-col"
+          style={{ willChange: "opacity, transform, filter" }}
+        >
           <Switch>
             <Route path="/" component={Home} />
             <Route path="/menu" component={MenuPage} />
@@ -89,9 +89,9 @@ function AnimatedRoutes() {
             <Route path="/order/:id" component={OrderTrackingPage} />
             <Route component={NotFound} />
           </Switch>
-        </Suspense>
-      </motion.div>
-    </AnimatePresence>
+        </motion.div>
+      </AnimatePresence>
+    </Suspense>
   );
 }
 
