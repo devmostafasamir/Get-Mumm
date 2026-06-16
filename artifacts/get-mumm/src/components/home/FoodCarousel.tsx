@@ -176,14 +176,15 @@ export function FoodCarousel() {
           }}
         />
 
-        {/* ── Giant ghost text ────────────────────────────────────────────── */}
+        {/* ── Giant ghost text ─────────────────────────────────────────────
+             NO overflow:hidden here — the outer section already clips.
+             The inner clip was what sliced the top/bottom of the letters. */}
         <div
           aria-hidden
           style={{
-            position: "absolute", insetInline: 0, top: "14%",
+            position: "absolute", inset: 0,
             display: "flex", alignItems: "center", justifyContent: "center",
             pointerEvents: "none", userSelect: "none", zIndex: 2,
-            overflow: "hidden",
           }}
         >
           <AnimatePresence mode="wait">
@@ -195,10 +196,10 @@ export function FoodCarousel() {
               transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
               style={{
                 fontFamily: "'Cairo', sans-serif",
-                fontSize: "clamp(72px, 22vw, 320px)",
+                fontSize: "clamp(72px, 20vw, 280px)",
                 fontWeight: 900,
                 color: "white",
-                opacity: 0.10,
+                opacity: 0.09,
                 lineHeight: 1,
                 textTransform: "uppercase",
                 letterSpacing: "-0.02em",
@@ -210,15 +211,22 @@ export function FoodCarousel() {
           </AnimatePresence>
         </div>
 
-        {/* ── Section label – centered top ────────────────────────────────── */}
+        {/* ── Section label — vertically centered on the side edge ──────────
+             Rotated 90° so it reads bottom-to-top on LTR, top-to-bottom on RTL. */}
         <div style={{
-          position: "absolute", top: 28,
-          left: "50%", transform: "translateX(-50%)",
-          zIndex: 60, whiteSpace: "nowrap",
+          position: "absolute",
+          top: "50%",
+          [isRtl ? "right" : "left"]: 16,
+          transform: isRtl
+            ? "translateY(-50%) rotate(90deg)"
+            : "translateY(-50%) rotate(-90deg)",
+          transformOrigin: "center center",
+          zIndex: 60,
+          whiteSpace: "nowrap",
         }}>
           <span style={{
-            color: "rgba(255,255,255,0.82)", fontSize: 11,
-            fontWeight: 700, letterSpacing: "0.18em", textTransform: "uppercase",
+            color: "rgba(255,255,255,0.70)", fontSize: 10,
+            fontWeight: 700, letterSpacing: "0.22em", textTransform: "uppercase",
           }}>
             {t("SIGNATURE DISHES", "أطباقنا المميزة")}
           </span>
