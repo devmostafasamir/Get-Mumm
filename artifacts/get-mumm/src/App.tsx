@@ -1,9 +1,11 @@
-import { Switch, Route, Router as WouterRouter } from "wouter";
+import { Switch, Route, Router as WouterRouter, useLocation } from "wouter";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { AnimatePresence, motion } from "framer-motion";
 import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { LanguageProvider } from "@/contexts/LanguageContext";
 import { ThemeProvider } from "@/contexts/ThemeContext";
+import { pageVariants } from "@/lib/motion";
 
 import { Navbar } from "@/components/layout/Navbar";
 import { Footer } from "@/components/layout/Footer";
@@ -26,11 +28,20 @@ import NotFound from "@/pages/not-found";
 
 const queryClient = new QueryClient();
 
-function Router() {
+function AnimatedRoutes() {
+  const [location] = useLocation();
+
   return (
-    <div className="min-h-[100dvh] flex flex-col bg-background text-foreground">
-      <Navbar />
-      <main className="flex-1 flex flex-col">
+    <AnimatePresence mode="wait" initial>
+      <motion.div
+        key={location}
+        variants={pageVariants}
+        initial="initial"
+        animate="enter"
+        exit="exit"
+        className="flex-1 flex flex-col"
+        style={{ willChange: "opacity, transform, filter" }}
+      >
         <Switch>
           <Route path="/" component={Home} />
           <Route path="/menu" component={MenuPage} />
@@ -48,6 +59,17 @@ function Router() {
           <Route path="/partner" component={PartnerPage} />
           <Route component={NotFound} />
         </Switch>
+      </motion.div>
+    </AnimatePresence>
+  );
+}
+
+function Router() {
+  return (
+    <div className="min-h-[100dvh] flex flex-col bg-background text-foreground">
+      <Navbar />
+      <main className="flex-1 flex flex-col">
+        <AnimatedRoutes />
       </main>
       <Footer />
     </div>

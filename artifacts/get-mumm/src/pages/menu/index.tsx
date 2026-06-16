@@ -9,6 +9,7 @@ import { Search, X, SlidersHorizontal, Star, Clock, ChevronDown } from "lucide-r
 import { Skeleton } from "@/components/ui/skeleton";
 import { PaginationControls } from "@/components/ui/pagination-controls";
 import { motion, AnimatePresence } from "framer-motion";
+import { staggerGrid, cardVariant, sectionReveal } from "@/lib/motion";
 
 const ITEMS_PER_PAGE = 9;
 
@@ -38,15 +39,11 @@ export default function MenuPage() {
   const [currentPage, setCurrentPage] = useState(1);
   const [filtersOpen, setFiltersOpen] = useState(false);
 
-  const categoryScrollRef = useRef<HTMLDivElement>(null);
-
-  // Debounce search
   useEffect(() => {
-    const t = setTimeout(() => setDebouncedSearch(search), 350);
-    return () => clearTimeout(t);
+    const timer = setTimeout(() => setDebouncedSearch(search), 350);
+    return () => clearTimeout(timer);
   }, [search]);
 
-  // Reset page on filter change
   useEffect(() => { setCurrentPage(1); }, [activeCategory, activeDietary, priceRangeIdx, debouncedSearch]);
 
   const { data: categories, isLoading: isCategoriesLoading } = useListCategories();
@@ -56,7 +53,6 @@ export default function MenuPage() {
     maxPrice: PRICE_RANGES[priceRangeIdx].max ?? undefined,
   });
 
-  // Client-side dietary filter (API doesn't have it as a param)
   const items = useMemo(() => {
     if (!allItems) return [];
     if (activeDietary.length === 0) return allItems;
@@ -86,18 +82,20 @@ export default function MenuPage() {
     setCurrentPage(1);
   };
 
-  const toggleDietary = (val: string) => {
+  const toggleDietary = (val: string) =>
     setActiveDietary((prev) =>
       prev.includes(val) ? prev.filter((d) => d !== val) : [...prev, val]
     );
-  };
+
+  // Grid re-stagger key — changes whenever filters or page changes
+  const gridKey = `${currentPage}-${activeCategory}-${debouncedSearch}-${priceRangeIdx}-${activeDietary.join(",")}`;
 
   return (
     <PageWrapper>
-      {/* Page Header */}
+      {/* Header */}
       <div className="bg-primary/8 pt-28 sm:pt-32 pb-10 border-b border-border">
         <div className="container mx-auto px-4 sm:px-6">
-          <div className="text-center mb-8">
+          <motion.div {...sectionReveal} className="text-center mb-8">
             <h1 className="text-3xl sm:text-5xl font-serif font-bold mb-3">
               {t("Our Menu", "قائمة الطعام")}
             </h1>
@@ -107,57 +105,69 @@ export default function MenuPage() {
                 "وجبات طازجة ومنزلية من أمهر طهاتنا، تصلك حتى بابك."
               )}
             </p>
-          </div>
+          </motion.div>
 
-          {/* Search Bar */}
-          <div className="max-w-lg mx-auto relative">
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5, delay: 0.15, ease: [0.22, 1, 0.36, 1] }}
+            className="max-w-lg mx-auto relative"
+          >
             <Search
-              className={`absolute top-1/2 -translate-y-1/2 text-muted-foreground h-4 w-4 pointer-events-none ${
-                isRtl ? "right-4" : "left-4"
-              }`}
+              className={`absolute top-1/2 -translate-y-1/2 text-muted-foreground h-4 w-4 pointer-events-none ${isRtl ? "right-4" : "left-4"}`}
             />
             <Input
               placeholder={t("Search dishes, chefs...", "ابحث عن طبق أو شيف...")}
-              className={`h-12 rounded-full bg-background shadow-sm border-border text-sm ${
-                isRtl ? "pr-11 pl-11" : "pl-11 pr-11"
-              }`}
+              className={`h-12 rounded-full bg-background shadow-sm border-border text-sm ${isRtl ? "pr-11 pl-11" : "pl-11 pr-11"}`}
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               data-testid="input-menu-search"
             />
-            {search && (
-              <button
-                onClick={() => setSearch("")}
-                className={`absolute top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors ${
-                  isRtl ? "left-4" : "right-4"
-                }`}
-                aria-label="Clear search"
-              >
-                <X className="h-4 w-4" />
-              </button>
-            )}
-          </div>
+            <AnimatePresence>
+              {search && (
+                <motion.button
+                  initial={{ opacity: 0, scale: 0.7 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  exit={{ opacity: 0, scale: 0.7 }}
+                  transition={{ duration: 0.15 }}
+                  onClick={() => setSearch("")}
+                  className={`absolute top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors ${isRtl ? "left-4" : "right-4"}`}
+                >
+                  <X className="h-4 w-4" />
+                </motion.button>
+              )}
+            </AnimatePresence>
+          </motion.div>
         </div>
       </div>
 
       <div className="container mx-auto px-4 sm:px-6 py-8">
 
-        {/* ── Category Tabs (horizontal scroll, visible on all screens) ── */}
-        <div
-          ref={categoryScrollRef}
+        {/* Category Tabs */}
+        <motion.div
+          initial={{ opacity: 0, y: 16 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.45, delay: 0.1, ease: [0.22, 1, 0.36, 1] }}
           className="flex items-center gap-2 overflow-x-auto no-scrollbar pb-2 mb-6"
           data-testid="filter-categories"
         >
           <button
             onClick={() => setActiveCategory(null)}
-            className={`shrink-0 px-4 py-2 rounded-full text-sm font-semibold border transition-all ${
+            className={`relative shrink-0 px-4 py-2 rounded-full text-sm font-semibold border transition-colors ${
               activeCategory === null
-                ? "bg-primary text-primary-foreground border-primary shadow-sm"
+                ? "border-primary text-primary-foreground"
                 : "border-border text-muted-foreground hover:border-primary hover:text-primary bg-background"
             }`}
             data-testid="filter-category-all"
           >
-            {t("All", "الكل")}
+            {activeCategory === null && (
+              <motion.span
+                layoutId="category-pill"
+                className="absolute inset-0 bg-primary rounded-full"
+                transition={{ type: "spring", stiffness: 380, damping: 32 }}
+              />
+            )}
+            <span className="relative z-10">{t("All", "الكل")}</span>
           </button>
           {isCategoriesLoading
             ? Array(5).fill(0).map((_, i) => (
@@ -167,15 +177,22 @@ export default function MenuPage() {
                 <button
                   key={cat.id}
                   onClick={() => setActiveCategory(activeCategory === cat.id ? null : cat.id)}
-                  className={`shrink-0 flex items-center gap-1.5 px-4 py-2 rounded-full text-sm font-semibold border transition-all ${
+                  className={`relative shrink-0 flex items-center gap-1.5 px-4 py-2 rounded-full text-sm font-semibold border transition-colors ${
                     activeCategory === cat.id
-                      ? "bg-primary text-primary-foreground border-primary shadow-sm"
+                      ? "border-primary text-primary-foreground"
                       : "border-border text-muted-foreground hover:border-primary hover:text-primary bg-background"
                   }`}
                   data-testid={`filter-category-${cat.id}`}
                 >
-                  {isRtl ? cat.nameAr : cat.name}
-                  <span className={`text-xs px-1.5 py-0.5 rounded-full font-normal ${
+                  {activeCategory === cat.id && (
+                    <motion.span
+                      layoutId="category-pill"
+                      className="absolute inset-0 bg-primary rounded-full"
+                      transition={{ type: "spring", stiffness: 380, damping: 32 }}
+                    />
+                  )}
+                  <span className="relative z-10">{isRtl ? cat.nameAr : cat.name}</span>
+                  <span className={`relative z-10 text-xs px-1.5 py-0.5 rounded-full font-normal ${
                     activeCategory === cat.id
                       ? "bg-primary-foreground/20 text-primary-foreground"
                       : "bg-muted text-muted-foreground"
@@ -184,11 +201,15 @@ export default function MenuPage() {
                   </span>
                 </button>
               ))}
-        </div>
+        </motion.div>
 
-        {/* ── Advanced Filters Row ── */}
-        <div className="flex flex-wrap items-center gap-2 mb-6">
-          {/* Filter toggle button (mobile-friendly) */}
+        {/* Filter Row */}
+        <motion.div
+          initial={{ opacity: 0, y: 12 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.4, delay: 0.18, ease: [0.22, 1, 0.36, 1] }}
+          className="flex flex-wrap items-center gap-2 mb-6"
+        >
           <button
             onClick={() => setFiltersOpen(!filtersOpen)}
             className={`flex items-center gap-2 px-4 py-2 rounded-full text-sm font-semibold border transition-all ${
@@ -200,15 +221,26 @@ export default function MenuPage() {
           >
             <SlidersHorizontal className="h-4 w-4" />
             {t("Filters", "تصفية")}
-            {(activeDietary.length > 0 || priceRangeIdx > 0) && (
-              <span className="bg-primary text-primary-foreground text-xs w-5 h-5 rounded-full flex items-center justify-center font-bold">
-                {activeDietary.length + (priceRangeIdx > 0 ? 1 : 0)}
-              </span>
-            )}
-            <ChevronDown className={`h-3.5 w-3.5 transition-transform ${filtersOpen ? "rotate-180" : ""}`} />
+            <AnimatePresence>
+              {(activeDietary.length > 0 || priceRangeIdx > 0) && (
+                <motion.span
+                  initial={{ scale: 0, opacity: 0 }}
+                  animate={{ scale: 1, opacity: 1 }}
+                  exit={{ scale: 0, opacity: 0 }}
+                  className="bg-primary text-primary-foreground text-xs w-5 h-5 rounded-full flex items-center justify-center font-bold"
+                >
+                  {activeDietary.length + (priceRangeIdx > 0 ? 1 : 0)}
+                </motion.span>
+              )}
+            </AnimatePresence>
+            <motion.div
+              animate={{ rotate: filtersOpen ? 180 : 0 }}
+              transition={{ duration: 0.2 }}
+            >
+              <ChevronDown className="h-3.5 w-3.5" />
+            </motion.div>
           </button>
 
-          {/* Price range pills */}
           {PRICE_RANGES.slice(1).map((range, i) => (
             <button
               key={i}
@@ -224,37 +256,44 @@ export default function MenuPage() {
             </button>
           ))}
 
-          {/* Clear all */}
-          {activeFilterCount > 0 && (
-            <button
-              onClick={clearAll}
-              className="flex items-center gap-1 px-3.5 py-2 rounded-full text-sm font-medium border border-dashed border-destructive/50 text-destructive hover:bg-destructive/8 transition-colors ml-auto"
-              data-testid="button-clear-filters"
-            >
-              <X className="h-3.5 w-3.5" />
-              {t(`Clear all (${activeFilterCount})`, `مسح الكل (${activeFilterCount})`)}
-            </button>
-          )}
-        </div>
+          <AnimatePresence>
+            {activeFilterCount > 0 && (
+              <motion.button
+                initial={{ opacity: 0, x: 10 }}
+                animate={{ opacity: 1, x: 0 }}
+                exit={{ opacity: 0, x: 10 }}
+                onClick={clearAll}
+                className="flex items-center gap-1 px-3.5 py-2 rounded-full text-sm font-medium border border-dashed border-destructive/50 text-destructive hover:bg-destructive/8 transition-colors ml-auto"
+                data-testid="button-clear-filters"
+              >
+                <X className="h-3.5 w-3.5" />
+                {t(`Clear all (${activeFilterCount})`, `مسح الكل (${activeFilterCount})`)}
+              </motion.button>
+            )}
+          </AnimatePresence>
+        </motion.div>
 
-        {/* ── Dietary Filter Panel ── */}
+        {/* Dietary Filter Panel */}
         <AnimatePresence>
           {filtersOpen && (
             <motion.div
-              initial={{ opacity: 0, height: 0 }}
-              animate={{ opacity: 1, height: "auto" }}
-              exit={{ opacity: 0, height: 0 }}
-              transition={{ duration: 0.2 }}
+              initial={{ opacity: 0, height: 0, marginBottom: 0 }}
+              animate={{ opacity: 1, height: "auto", marginBottom: 24 }}
+              exit={{ opacity: 0, height: 0, marginBottom: 0 }}
+              transition={{ duration: 0.28, ease: [0.22, 1, 0.36, 1] }}
               className="overflow-hidden"
             >
-              <div className="bg-muted/40 border border-border rounded-2xl p-4 mb-6">
+              <div className="bg-muted/40 border border-border rounded-2xl p-4">
                 <p className="text-xs font-bold uppercase tracking-wider text-muted-foreground mb-3">
                   {t("Dietary Preference", "التفضيل الغذائي")}
                 </p>
                 <div className="flex flex-wrap gap-2">
-                  {DIETARY_OPTIONS.map((opt) => (
-                    <button
+                  {DIETARY_OPTIONS.map((opt, i) => (
+                    <motion.button
                       key={opt.value}
+                      initial={{ opacity: 0, y: 8 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ delay: i * 0.04 }}
                       onClick={() => toggleDietary(opt.value)}
                       className={`px-4 py-2 rounded-full text-sm font-medium border transition-all ${
                         activeDietary.includes(opt.value)
@@ -264,7 +303,7 @@ export default function MenuPage() {
                       data-testid={`filter-dietary-${opt.value}`}
                     >
                       {isRtl ? opt.labelAr : opt.labelEn}
-                    </button>
+                    </motion.button>
                   ))}
                 </div>
               </div>
@@ -272,23 +311,33 @@ export default function MenuPage() {
           )}
         </AnimatePresence>
 
-        {/* ── Results Count + Sort ── */}
+        {/* Results Count */}
         <div className="flex items-center justify-between mb-5 min-h-[28px]">
-          <div className="text-sm text-muted-foreground" data-testid="text-results-count">
-            {isItemsLoading ? (
-              <Skeleton className="h-4 w-32" />
-            ) : (
-              <>
-                <span className="font-semibold text-foreground">{items.length}</span>{" "}
-                {t("dishes found", "طبق متاح")}
-                {activeFilterCount > 0 && (
-                  <span className="text-primary font-medium">
-                    {" "}{t("(filtered)", "(بعد التصفية)")}
-                  </span>
-                )}
-              </>
-            )}
-          </div>
+          <AnimatePresence mode="wait">
+            <motion.div
+              key={isItemsLoading ? "loading" : `count-${items.length}`}
+              initial={{ opacity: 0, y: 6 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -6 }}
+              transition={{ duration: 0.2 }}
+              className="text-sm text-muted-foreground"
+              data-testid="text-results-count"
+            >
+              {isItemsLoading ? (
+                <Skeleton className="h-4 w-32" />
+              ) : (
+                <>
+                  <span className="font-semibold text-foreground">{items.length}</span>{" "}
+                  {t("dishes found", "طبق متاح")}
+                  {activeFilterCount > 0 && (
+                    <span className="text-primary font-medium">
+                      {" "}{t("(filtered)", "(بعد التصفية)")}
+                    </span>
+                  )}
+                </>
+              )}
+            </motion.div>
+          </AnimatePresence>
           {totalPages > 1 && (
             <p className="text-xs text-muted-foreground">
               {t(`Page ${currentPage} of ${totalPages}`, `صفحة ${currentPage} من ${totalPages}`)}
@@ -296,103 +345,114 @@ export default function MenuPage() {
           )}
         </div>
 
-        {/* ── Items Grid ── */}
+        {/* Items Grid */}
         {isItemsLoading ? (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
             {Array(9).fill(0).map((_, i) => (
-              <div key={i} className="space-y-3">
+              <motion.div
+                key={i}
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ delay: i * 0.04 }}
+                className="space-y-3"
+              >
                 <Skeleton className="h-48 w-full rounded-2xl" />
                 <Skeleton className="h-5 w-2/3" />
                 <Skeleton className="h-4 w-full" />
-                <Skeleton className="h-4 w-4/5" />
-              </div>
+              </motion.div>
             ))}
           </div>
         ) : paginatedItems.length === 0 ? (
-          <div className="text-center py-20 bg-muted/30 rounded-2xl border border-dashed border-border">
+          <motion.div
+            initial={{ opacity: 0, scale: 0.97 }}
+            animate={{ opacity: 1, scale: 1 }}
+            className="text-center py-20 bg-muted/30 rounded-2xl border border-dashed border-border"
+          >
             <div className="text-4xl mb-4">🍽️</div>
             <h3 className="text-xl font-bold mb-2">{t("No dishes found", "لم يتم العثور على أطباق")}</h3>
             <p className="text-muted-foreground mb-6 text-sm">
               {t("Try adjusting your search or filters.", "جرب تغيير كلمة البحث أو التصفية.")}
             </p>
-            <button
-              onClick={clearAll}
-              className="px-6 py-2.5 rounded-full bg-primary text-primary-foreground text-sm font-bold hover:bg-primary/85 transition-colors"
-            >
+            <button onClick={clearAll} className="px-6 py-2.5 rounded-full bg-primary text-primary-foreground text-sm font-bold hover:bg-primary/85 transition-colors">
               {t("Clear Filters", "مسح التصفية")}
             </button>
-          </div>
+          </motion.div>
         ) : (
           <>
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
-              {paginatedItems.map((item) => (
-                <Link key={item.id} href={`/menu/${item.id}`}>
-                  <motion.div
-                    whileHover={{ y: -4 }}
-                    transition={{ duration: 0.2 }}
-                    className="group bg-card border border-card-border rounded-2xl overflow-hidden hover:shadow-lg transition-shadow cursor-pointer h-full flex flex-col"
-                    data-testid={`card-menu-item-${item.id}`}
-                  >
-                    {/* Image */}
-                    <div className="relative h-48 overflow-hidden bg-muted shrink-0">
-                      <img
-                        src={item.imageUrl}
-                        alt={isRtl ? item.nameAr : item.name}
-                        className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
-                        loading="lazy"
-                      />
-                      {item.isFeatured && (
-                        <span className={`absolute top-3 ${isRtl ? "right-3" : "left-3"} bg-primary text-primary-foreground text-[11px] font-bold px-2.5 py-1 rounded-full shadow`}>
-                          {t("Popular", "الأكثر طلباً")}
-                        </span>
-                      )}
-                      {item.dietary.includes("vegetarian") && (
-                        <span className={`absolute top-3 ${isRtl ? "left-3" : "right-3"} bg-green-500 text-white text-[10px] font-bold px-2 py-0.5 rounded-full`}>
-                          {t("Veg", "نباتي")}
-                        </span>
-                      )}
-                    </div>
-
-                    {/* Content */}
-                    <div className="p-4 flex flex-col flex-1">
-                      <div className="flex items-start justify-between gap-2 mb-1.5">
-                        <h3 className="font-bold text-base leading-snug">
-                          {isRtl ? item.nameAr : item.name}
-                        </h3>
-                        <span className="font-bold text-primary whitespace-nowrap text-sm shrink-0">
-                          {item.price} {t("EGP", "ج.م")}
-                        </span>
-                      </div>
-                      <p className="text-muted-foreground text-sm line-clamp-2 mb-3 flex-1">
-                        {isRtl ? item.descriptionAr : item.description}
-                      </p>
-
-                      {/* Footer */}
-                      <div className="flex items-center justify-between text-xs text-muted-foreground border-t border-border pt-3 mt-auto">
-                        <span className="flex items-center gap-1.5">
-                          <span className="w-1.5 h-1.5 rounded-full bg-primary" />
-                          {isRtl ? item.chefNameAr : item.chefName}
-                        </span>
-                        <div className="flex items-center gap-3">
-                          {item.rating && (
-                            <span className="flex items-center gap-0.5">
-                              <Star className="h-3 w-3 fill-primary text-primary" />
-                              {item.rating}
+            <AnimatePresence mode="wait">
+              <motion.div
+                key={gridKey}
+                variants={staggerGrid}
+                initial="hidden"
+                animate="show"
+                exit="exit"
+                className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5"
+              >
+                {paginatedItems.map((item) => (
+                  <motion.div key={item.id} variants={cardVariant}>
+                    <Link href={`/menu/${item.id}`}>
+                      <motion.div
+                        whileHover={{ y: -5, scale: 1.01 }}
+                        whileTap={{ scale: 0.98 }}
+                        transition={{ type: "spring", stiffness: 320, damping: 26 }}
+                        className="group bg-card border border-card-border rounded-2xl overflow-hidden hover:shadow-xl transition-shadow cursor-pointer h-full flex flex-col"
+                        data-testid={`card-menu-item-${item.id}`}
+                      >
+                        <div className="relative h-48 overflow-hidden bg-muted shrink-0">
+                          <img
+                            src={item.imageUrl}
+                            alt={isRtl ? item.nameAr : item.name}
+                            className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
+                            loading="lazy"
+                          />
+                          {item.isFeatured && (
+                            <span className={`absolute top-3 ${isRtl ? "right-3" : "left-3"} bg-primary text-primary-foreground text-[11px] font-bold px-2.5 py-1 rounded-full shadow`}>
+                              {t("Popular", "الأكثر طلباً")}
                             </span>
                           )}
-                          {item.prepTimeMinutes && (
-                            <span className="flex items-center gap-0.5">
-                              <Clock className="h-3 w-3" />
-                              {item.prepTimeMinutes}{t("m", "د")}
+                          {item.dietary.includes("vegetarian") && (
+                            <span className={`absolute top-3 ${isRtl ? "left-3" : "right-3"} bg-green-500 text-white text-[10px] font-bold px-2 py-0.5 rounded-full`}>
+                              {t("Veg", "نباتي")}
                             </span>
                           )}
                         </div>
-                      </div>
-                    </div>
+                        <div className="p-4 flex flex-col flex-1">
+                          <div className="flex items-start justify-between gap-2 mb-1.5">
+                            <h3 className="font-bold text-base leading-snug">{isRtl ? item.nameAr : item.name}</h3>
+                            <span className="font-bold text-primary whitespace-nowrap text-sm shrink-0">
+                              {item.price} {t("EGP", "ج.م")}
+                            </span>
+                          </div>
+                          <p className="text-muted-foreground text-sm line-clamp-2 mb-3 flex-1">
+                            {isRtl ? item.descriptionAr : item.description}
+                          </p>
+                          <div className="flex items-center justify-between text-xs text-muted-foreground border-t border-border pt-3 mt-auto">
+                            <span className="flex items-center gap-1.5">
+                              <span className="w-1.5 h-1.5 rounded-full bg-primary" />
+                              {isRtl ? item.chefNameAr : item.chefName}
+                            </span>
+                            <div className="flex items-center gap-3">
+                              {item.rating && (
+                                <span className="flex items-center gap-0.5">
+                                  <Star className="h-3 w-3 fill-primary text-primary" />
+                                  {item.rating}
+                                </span>
+                              )}
+                              {item.prepTimeMinutes && (
+                                <span className="flex items-center gap-0.5">
+                                  <Clock className="h-3 w-3" />
+                                  {item.prepTimeMinutes}{t("m", "د")}
+                                </span>
+                              )}
+                            </div>
+                          </div>
+                        </div>
+                      </motion.div>
+                    </Link>
                   </motion.div>
-                </Link>
-              ))}
-            </div>
+                ))}
+              </motion.div>
+            </AnimatePresence>
 
             <PaginationControls
               currentPage={currentPage}
